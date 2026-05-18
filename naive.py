@@ -6,7 +6,7 @@ with open("female_names.csv", newline="") as f:
     reader = csv.reader(f)
     first_column = [row[0] for row in reader]
 
-names = first_column[1:]
+names = [n.lower() for n in first_column[1:]]
 
 letters = sorted(list(set("".join(names))))
 stoi = {s: i + 1 for i, s in enumerate(letters)}
