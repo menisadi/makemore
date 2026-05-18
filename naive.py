@@ -2,7 +2,7 @@ import torch
 import csv
 from tqdm import tqdm
 
-with open("names.csv", newline="") as f:
+with open("female_names.csv", newline="") as f:
     reader = csv.reader(f)
     first_column = [row[0] for row in reader]
 
