@@ -1,4 +1,5 @@
 import csv
+from tqdm import tqdm
 
 
 def load_data(file_name: str) -> list[str]:
@@ -22,9 +23,16 @@ def setup_vocab(corpus: list[str]) -> tuple[list[str], dict[str, int], dict[int,
     return names, stoi, itos
 
 
-def bigram_counts():
-    pass
+def create_train(vocab: list[str], stoi: dict[str, int]) -> list[tuple[int, int]]:
+    bigrams: list[tuple[int, int]] = []
+    for w in tqdm(vocab):
+        for i in range(len(w) - 1):
+            ind1 = stoi[w[i]]
+            ind2 = stoi[w[i + 1]]
+            bigrams.append((ind1, ind2))
+
+    return bigrams
 
 
-def loss():
-    pass
+def loss(ytrue, ypred):
+    return
