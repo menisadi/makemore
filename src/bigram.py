@@ -1,5 +1,6 @@
 import csv
 from tqdm import tqdm
+import torch
 
 
 def load_data(file_name: str) -> list[str]:
@@ -10,7 +11,7 @@ def load_data(file_name: str) -> list[str]:
     return first_column[1:]
 
 
-def setup_vocab(corpus: list[str]) -> tuple[list[str], dict[str, int], dict[int, str]]:
+def setup_data(corpus: list[str]) -> tuple[list[str], dict[str, int], dict[int, str]]:
     names = [n.lower() for n in corpus]
 
     letters = sorted(list(set("".join(names))))
@@ -23,16 +24,33 @@ def setup_vocab(corpus: list[str]) -> tuple[list[str], dict[str, int], dict[int,
     return names, stoi, itos
 
 
-def create_train(vocab: list[str], stoi: dict[str, int]) -> list[tuple[int, int]]:
-    bigrams: list[tuple[int, int]] = []
+def create_train(vocab: list[str], stoi: dict[str, int]) -> tuple[list[int], list[int]]:
+    xs: list[int] = []
+    ys: list[int] = []
     for w in tqdm(vocab):
         for i in range(len(w) - 1):
             ind1 = stoi[w[i]]
             ind2 = stoi[w[i + 1]]
-            bigrams.append((ind1, ind2))
+            xs.append(ind1)
+            ys.append(ind2)
 
-    return bigrams
+    return xs, ys
 
 
 def loss(ytrue, ypred):
     return
+
+
+if __name__ == "__main__":
+    raw_data = load_data("female_names.csv")
+    names, stoi, itos = setup_data(raw_data)
+    xs, ys = create_train(names, stoi)
+
+    n = len(stoi)
+    W = torch.zeros(n, n, requires_grad=True)
+    ts = torch.tensor(xs)
+    ytrue = torch.tensor(ys)
+    ohs = torch.nn.functional.one_hot(ts, n).float()
+    ylogits = ohs @ W
+    ycounts = ylogits.exp()
+    ypred = ycounts / ycounts.sum(dim=1, keepdim=True)
