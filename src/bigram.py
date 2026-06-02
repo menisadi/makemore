@@ -37,8 +37,8 @@ def create_train(vocab: list[str], stoi: dict[str, int]) -> tuple[list[int], lis
     return xs, ys
 
 
-def loss(ytrue, ypred):
-    return
+def loss(ytrue: torch.Tensor, ypred: torch.Tensor):
+    return -ypred[torch.arange(len(ytrue)), ytrue].log().mean()
 
 
 if __name__ == "__main__":
@@ -51,6 +51,11 @@ if __name__ == "__main__":
     ts = torch.tensor(xs)
     ytrue = torch.tensor(ys)
     ohs = torch.nn.functional.one_hot(ts, n).float()
+
     ylogits = ohs @ W
     ycounts = ylogits.exp()
     ypred = ycounts / ycounts.sum(dim=1, keepdim=True)
+    current_loss = loss(ytrue, ypred)
+    print(current_loss)
+
+    current_loss.backward()
