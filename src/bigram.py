@@ -46,16 +46,24 @@ if __name__ == "__main__":
     names, stoi, itos = setup_data(raw_data)
     xs, ys = create_train(names, stoi)
 
+    learning_rate = 50
     n = len(stoi)
-    W = torch.zeros(n, n, requires_grad=True)
+    weights = torch.zeros(n, n, requires_grad=True)
     ts = torch.tensor(xs)
     ytrue = torch.tensor(ys)
     ohs = torch.nn.functional.one_hot(ts, n).float()
 
-    ylogits = ohs @ W
-    ycounts = ylogits.exp()
-    ypred = ycounts / ycounts.sum(dim=1, keepdim=True)
-    current_loss = loss(ytrue, ypred)
-    print(current_loss)
+    current_loss = None
+    for i in tqdm(range(1_000)):
+        ylogits = ohs @ weights
+        ycounts = ylogits.exp()
+        ypred = ycounts / ycounts.sum(dim=1, keepdim=True)
+        current_loss = loss(ytrue, ypred)
+        # print(current_loss.item())
 
-    current_loss.backward()
+        current_loss.backward()
+        weights.data -= weights.grad * learning_rate
+        weights.grad = None
+
+    if current_loss is not None:
+        print(f"Loss: {current_loss.item()}")
