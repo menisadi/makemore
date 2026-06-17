@@ -74,7 +74,9 @@ def generate(weights: torch.Tensor, stoi: dict[str, int], itos: dict[int, str]) 
     while True:
         gen.append(c)
         ind = stoi[c]
-        res: int = int(torch.multinomial(weights[ind], 1, replacement=True).item())
+        logits = weights[ind]
+        probs = torch.softmax(logits, dim=0)
+        res: int = int(torch.multinomial(probs, 1, replacement=True).item())
         c = itos[res]
         if c == ".":
             break
