@@ -68,6 +68,20 @@ def train(
     return weights, current_loss
 
 
+def generate(weights: torch.Tensor, stoi: dict[str, int], itos: dict[int, str]) -> str:
+    gen: list[str] = []
+    c = "."
+    while True:
+        gen.append(c)
+        ind = stoi[c]
+        res: int = int(torch.multinomial(weights[ind], 1, replacement=True).item())
+        c = itos[res]
+        if c == ".":
+            break
+
+    return "".join(gen[1:])
+
+
 if __name__ == "__main__":
     raw_data = load_data("female_names.csv")
     names, stoi, itos = setup_data(raw_data)
@@ -76,3 +90,6 @@ if __name__ == "__main__":
     weights, final_loss = train(xs, ys, stoi)
     if final_loss is not None:
         print(final_loss.item())
+
+    name = generate(weights, stoi, itos)
+    print(name)
