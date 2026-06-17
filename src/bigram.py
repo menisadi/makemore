@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     weights, final_loss = train(xs, ys, stoi)
     if final_loss is not None:
-        print(final_loss.item())
+        print(f"Final loss: {final_loss.item()}")
 
     name = generate(weights, stoi, itos)
     print(name)
