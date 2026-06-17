@@ -41,12 +41,13 @@ def loss(ytrue: torch.Tensor, ypred: torch.Tensor):
     return -ypred[torch.arange(len(ytrue)), ytrue].log().mean()
 
 
-if __name__ == "__main__":
-    raw_data = load_data("female_names.csv")
-    names, stoi, itos = setup_data(raw_data)
-    xs, ys = create_train(names, stoi)
-
-    learning_rate = 50
+def train(
+    xs: list[int],
+    ys: list[int],
+    stoi: dict[str, int],
+    learning_rate: float = 50,
+    iterations: int = 1000,
+):
     n = len(stoi)
     weights = torch.zeros(n, n, requires_grad=True)
     ts = torch.tensor(xs)
@@ -54,16 +55,24 @@ if __name__ == "__main__":
     ohs = torch.nn.functional.one_hot(ts, n).float()
 
     current_loss = None
-    for i in tqdm(range(1_000)):
+    for _ in tqdm(range(iterations)):
         ylogits = ohs @ weights
         ycounts = ylogits.exp()
         ypred = ycounts / ycounts.sum(dim=1, keepdim=True)
         current_loss = loss(ytrue, ypred)
-        # print(current_loss.item())
 
         current_loss.backward()
         weights.data -= weights.grad * learning_rate
         weights.grad = None
 
-    if current_loss is not None:
-        print(f"Loss: {current_loss.item()}")
+    return weights, current_loss
+
+
+if __name__ == "__main__":
+    raw_data = load_data("female_names.csv")
+    names, stoi, itos = setup_data(raw_data)
+    xs, ys = create_train(names, stoi)
+
+    weights, final_loss = train(xs, ys, stoi)
+    if final_loss is not None:
+        print(final_loss.item())
